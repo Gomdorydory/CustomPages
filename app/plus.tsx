@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, useState } from "react"
+import { ReactNode, useState, useRef } from "react"
 import { faPenToSquare } from "@fortawesome/free-regular-svg-icons";
 import { faImage } from "@fortawesome/free-regular-svg-icons";
 import { faMapLocationDot } from "@fortawesome/free-solid-svg-icons";
@@ -8,8 +8,7 @@ import { faTableCellsLarge } from "@fortawesome/free-solid-svg-icons";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Text from "./create/text";
-import Drag from "./library/drag/page";
-
+import {ImageCropper, TextCropper} from "./library/useguesture";
 
 interface PlusInfo {
   id: string | undefined;
@@ -62,11 +61,12 @@ export default function Plus() {
     setSelected(selectedMenu)
   }
 
+  let _id = useRef<number>(0);
   const OnPhoto = () =>{
-    let NewList = [...list]
-    let NewItem = {id: 'first', options: 'first'}
-    NewList = [...NewList, NewItem]
-    setList(NewList); 
+    _id.current += 1
+    let NewItem = {id: _id.current.toString(), options: 'first'}
+    console.log([...list, NewItem])
+    setList((list)=>[NewItem, ...list])
   }
 
   const OnMap = () =>{
@@ -89,7 +89,7 @@ export default function Plus() {
   let [selected, setSelected] = useState<ReactNode>(
     <div className="main-plus">
     <div className="item"  onClick={OnText}><FontAwesomeIcon icon={faPenToSquare} size="2xl"/></div>
-    <div className="item"  onClick={OnPhoto}><FontAwesomeIcon icon={faImage}  size="2xl"/></div>
+    <div className="item"  onClick={()=>{OnPhoto()}}><FontAwesomeIcon icon={faImage}  size="2xl"/></div>
     <div className="item"  onClick={OnMap}><FontAwesomeIcon icon={faMapLocationDot}  size="2xl"/></div>
     <div className="item"  onClick={OnAlbum}><FontAwesomeIcon icon={faTableCellsLarge}  size="2xl"/></div>
   </div>
@@ -97,11 +97,12 @@ export default function Plus() {
 
 
 
-  let result = list.map((content,i)=><div className="main-item" key={i}><Drag src={content.options} />{content.options}</div>)
+  let result = list.map((content,i)=><div className="main-item" key={i}> <TextCropper src={content.options}/>{content.options}</div>)
   return (
     <div>
     {result}
     {selected}
+
     </div>
     )
 

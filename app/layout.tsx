@@ -1,7 +1,6 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
 
-import { faGear } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const inter = Inter({ subsets: ['latin'] })
@@ -20,7 +19,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
           <div className='main-header'>
-            <div><FontAwesomeIcon icon={faGear}/></div>
+            <div>설정</div>
           </div>  
         {children}
       </body>
