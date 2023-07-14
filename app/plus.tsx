@@ -1,6 +1,9 @@
 'use client'
 
-import { ReactNode, useState, useRef } from "react"
+import {v4 as uuidv4} from 'uuid';
+
+
+import React, {useState, useRef, useContext} from "react"
 import { faPenToSquare } from "@fortawesome/free-regular-svg-icons";
 import { faImage } from "@fortawesome/free-regular-svg-icons";
 import { faMapLocationDot } from "@fortawesome/free-solid-svg-icons";
@@ -10,100 +13,63 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Text from "./create/text";
 import {ImageCropper, TextCropper} from "./library/useguesture";
 
-interface PlusInfo {
+export interface PlusInfo {
   id: string | undefined;
-  options : string | undefined;
+  content : string | undefined;
+  type: types
 }
 
 interface PlusInfos extends Array<PlusInfo>{}
+export const listDataContext = React.createContext<PlusInfos|undefined>(undefined);
+export type listSettingArray = React.Dispatch<React.SetStateAction<PlusInfos>>
+export const listSettingContext = React.createContext<listSettingArray | undefined>(undefined);
+
+export type types = 'text' | 'image' | 'map' | 'album' | 'link'
 
 export default function Plus() {
+  let firstmyuuid = uuidv4();
   let [list, setList] = useState<PlusInfos>([
-    {
-      id: 'string',
-      options : 'string'
-    },
-    {
-      id: 'string',
-      options : 'string'
-    },
-    {
-      id: 'string',
-      options : 'string'
-    }
   ]);
 
 
-  const OnCreate = () =>{
-    let NewList = [...list]
-    let NewItem = {id: 'first', options: 'first'}
-    NewList = [...NewList, NewItem]
-    setList(NewList); 
-  }
-
   const OnText = () =>{
-    let selectedMenu = 
-    <div>
-        <button onClick={ToMenu}>X</button>
-        <button>Done</button>
-        <Text />
-    </div>
-    setSelected(selectedMenu)
+    let myuuid = uuidv4();
+    let NewItem : PlusInfo = {id: myuuid, content: 'first', type: 'text'}
+    setList((list)=>[...list, NewItem])
+    console.log(list)
   }
 
-  const ToMenu = () => {
-    let selectedMenu =  <div className="main-plus">
-    <div className="item"  onClick={OnText}><FontAwesomeIcon icon={faPenToSquare} size="2xl"/></div>
-    <div className="item"  onClick={OnPhoto}><FontAwesomeIcon icon={faImage}  size="2xl"/></div>
-    <div className="item"  onClick={OnMap}><FontAwesomeIcon icon={faMapLocationDot}  size="2xl"/></div>
-    <div className="item"  onClick={OnAlbum}><FontAwesomeIcon icon={faTableCellsLarge}  size="2xl"/></div>
-  </div>
-    setSelected(selectedMenu)
-  }
-
-  let _id = useRef<number>(0);
   const OnPhoto = () =>{
-    _id.current += 1
-    let NewItem = {id: _id.current.toString(), options: 'first'}
-    console.log([...list, NewItem])
-    setList((list)=>[NewItem, ...list])
   }
 
   const OnMap = () =>{
-    let NewList = [...list]
-    let NewItem = {id: 'first', options: 'first'}
-    NewList = [...NewList, NewItem]
-    setList(NewList); 
   }
 
   const OnAlbum = () =>{
-    let NewList = [...list]
-    let NewItem = {id: 'first', options: 'first'}
-    NewList = [...NewList, NewItem]
-    setList(NewList); 
   }
 
 
+  let result = list.map(
+    (list)=>{
+      return(
+    <div className="main-item" key={list.id}>
+      <TextCropper props={list}/>
+    </div>)
+    }
+    )
 
-
-  let [selected, setSelected] = useState<ReactNode>(
-    <div className="main-plus">
-    <div className="item"  onClick={OnText}><FontAwesomeIcon icon={faPenToSquare} size="2xl"/></div>
-    <div className="item"  onClick={()=>{OnPhoto()}}><FontAwesomeIcon icon={faImage}  size="2xl"/></div>
-    <div className="item"  onClick={OnMap}><FontAwesomeIcon icon={faMapLocationDot}  size="2xl"/></div>
-    <div className="item"  onClick={OnAlbum}><FontAwesomeIcon icon={faTableCellsLarge}  size="2xl"/></div>
-  </div>
-  );
-
-
-
-  let result = list.map((content,i)=><div className="main-item" key={i}> <TextCropper src={content.options}/>{content.options}</div>)
   return (
-    <div>
-    {result}
-    {selected}
-
-    </div>
+    <listSettingContext.Provider value={setList}>
+      <listDataContext.Provider value={list}>
+      {result}
+        <div className="main-plus">
+        <div className="item"  onClick={OnText}><FontAwesomeIcon icon={faPenToSquare} size='sm'/></div>
+        <div className="item"  onClick={OnPhoto}><FontAwesomeIcon icon={faImage} size='sm'/></div>
+        <div className="item"  onClick={OnMap}><FontAwesomeIcon icon={faMapLocationDot} size='sm'/></div>
+        <div className="item"  onClick={OnAlbum}><FontAwesomeIcon icon={faTableCellsLarge} size='sm'/></div>
+        </div>
+      </listDataContext.Provider>
+    </listSettingContext.Provider>
     )
 
 }

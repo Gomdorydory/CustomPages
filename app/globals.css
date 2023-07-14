@@ -4,11 +4,13 @@
 
   /*max-With*/
   --screen-max-width : 700px;
+  --main-item-border: 10px;
+  --main-item-border-minus: -10px;
 }
 
 body {
-  margin:0 auto;
   width: var(--screen-max-width);
+  margin: 0 auto;
 }
 
 .main-header {
@@ -18,27 +20,28 @@ body {
 
 .main-plus .item {
   font-size: max(5vw, 40px);
-  padding: max(1vw, 20px);
+  margin: 0;
   max-width: 200px;
+  color: white;
+  height: 10vh;
 }
 
 .main-plus {
-  border: 10px dashed var(--gray-color);
-  border-radius: 5%;
+  background-color: var(--gray-color);
 
-  display: grid;
-  grid-template-columns: auto auto;
-  grid-template-rows: auto auto;
-  align-content: center; /*세로방향 정렬 - align-items도 있음*/
-  justify-content: center; /*가로방향 정렬 - justify-items도 있음*/
+  height: 10vh;
+  width: var(--screen-max-width);
 
-  row-gap: 10px;
-  column-gap: 10px;
+  padding: 0;
 
-  margin: 20px;
+  position: fixed;
+  top: 90vh;
+
+  display: flex;
+  justify-content:space-around;
 
   text-align: center;
-  font-size: 200px;
+  font-size: 100px;
   color: var(--gray-color);
 
   -webkit-user-select:none;
@@ -48,10 +51,8 @@ body {
 }
 
 .main-item {
-  border: 10px dashed var(--gray-color);
-  border-radius: 5%;
+  margin: 20px 0;
 
-  margin: 20px;
 
   text-align: center;
   font-size: max(5vw, 100px);
@@ -74,7 +75,7 @@ body {
 }
 
 .text-setting1 div{
-  padding: 5px;
+  padding: 5px 0;
   border-radius: 5px;
   background-color: var(--gray-color);
   font-size: 70px;
@@ -89,27 +90,37 @@ body {
 }
 
 .text-setting2 div{
-  padding: 5px;
+  padding: 5px 0;
   border-radius: 5px;
   background-color: var(--gray-color);
   font-size: 70px;
 }
 
+.useguesture-container {
+  background-color: rgba(128, 128, 128, 0.361);
+  position: absolute;
+  left: 40vw;
+  top: 50vh;
+  transform:translateX(-50%, -50%);
+}
 
-.create-text {
+
+.create-text{
   text-align: center;
-  background-color: #00000044;
-  width: 700px;
-  height: 100vh;
+  background-color: #00000022;
+  width: var(--screen-max-width);
+  height: 120%;
   position: fixed;
+  top: 0;
+  margin: var(--main-item-border-minus);
 }
 
 .create-text textarea {
-  position: fixed;
-  top: 500px;
-  left: 350px;
+  position: relative;
+  top: 200px;
+  left: 20px;
   font-size: 60px;
-  max-width: 600px ;
+  max-width: 580px ;
   border: none;
   border-radius: 5%;
   margin-bottom: 10px;
@@ -129,13 +140,12 @@ body {
 .slider {
   transform: rotate(270deg);
   -webkit-appearance: none;
-  position: relative;
-  left: -300px;
-  top: 500px;
   width: 500px;
   height: 20px;
   background-color: rgb(204, 0, 255);
-
+  position: relative;
+  left : -300px;
+  top: 300px;
 }
 
 input[type=range]::-webkit-slider-thumb { 
@@ -149,6 +159,14 @@ input[type=range]::-webkit-slider-thumb {
   z-index: 100;
 }
 
+.trash-can {
+  background-color: red;
+  font-size: 10px;
+
+  position: fixed;
+  top: 80vh;
+  left: 45vw;
+}
 
 /*
 :root {
@@ -212,5 +230,29 @@ input[type=range]::-webkit-slider-thumb {
 
 .text-setting div:nth-child(3) {
   grid-column: 4/5;
+}
+.main-plus {
+  border: 10px dashed var(--gray-color);
+  border-radius: 5%;
+
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+  align-content: center; 세로방향 정렬 - align-items도 있음
+  justify-content: center; 가로방향 정렬 - justify-items도 있음
+
+  row-gap: 10px;
+  column-gap: 10px;
+
+  margin: 20px 0;
+
+  text-align: center;
+  font-size: 200px;
+  color: var(--gray-color);
+
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none
 }
 */
