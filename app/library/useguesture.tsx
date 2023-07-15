@@ -5,7 +5,6 @@ import { listDataContext } from "../plus"
 import { useDrag, useGesture } from "@use-gesture/react"
 import Text from "../create/text"
 import { types, PlusInfo } from "../plus"
-import { createContext } from "vm"
 
 'https://yourheartbadge.co.kr/web/product/tiny/attachment005.jpg'
 
@@ -55,36 +54,44 @@ export function ImageCropper(props:PlusInfo){
   )
 }
 
+//textcrop
+type textalign = 'center' | 'left' | 'right' | 'justify'
 interface settext {
   id : string|undefined,
   x: string|number,
   y: string|number,
   scale: number,
-  rotation: number
+  rotation: number,
+  fontSize?: number,
+  fontColor?: string,
+  textalign?: textalign,
+  fontFamily: string,
 }
 
-export type FunctionArray = Array<React.Dispatch<React.SetStateAction<boolean>>>
+export type FunctionArray = Array<React.Dispatch<React.SetStateAction<boolean>>| React.Dispatch<React.SetStateAction<settext>>>
+export let TextsettingFuncContext = React.createContext<FunctionArray | undefined>(undefined);
 
-export let settingFuncContext = React.createContext<FunctionArray | undefined>(undefined);
-
-export let settingDataContext = React.createContext<boolean | undefined>(undefined);
+export type DataArray = Array<boolean | undefined | number | settext>
+export let TextsettingDataContext = React.createContext<DataArray | undefined>(undefined);
 
 export function TextCropper(props:any){
   let list:any = useContext(listDataContext);
 
-  let [isEdit, setIsEdit] = useState<boolean>(false);
+  //setting-mode
+  let [isEdit, setIsEdit] = useState<boolean>(true);
   let [isDragged, setIsDragged] = useState<boolean>(false);
-  let [textcrop, settextCrop] = useState<settext>({id: list[0].id, x: 0, y: 0, scale:1, rotation: 0});
+  let [textcrop, setTextCrop] = useState<settext>({id: props.props.id, x: 0, y: 0, scale:1, rotation: 0, fontSize: 100, fontColor: 'black', textalign: 'left', fontFamily: 'Cafe24Shiningstar'});
+  let TextRef = useRef<HTMLTextAreaElement>(null);
+  console.log(textcrop)
 
-  let TextRef = useRef<HTMLDivElement>(null);
 
   useGesture(
     {
       onDrag: ({offset}) => {
-        settextCrop({...textcrop, x: offset[0], y:offset[1]})
+        setTextCrop({...textcrop, x: offset[0], y:offset[1]})
       },
       onPinch: (offset) => {
-        settextCrop((textcrop)=> ({...textcrop, scale: offset.offset[0], rotation: offset.da[1]+90}))
+        setTextCrop((textcrop)=> ({...textcrop, scale: offset.offset[0], rotation: offset.da[1]+90}))
         if(TextRef.current){
       }
       },
@@ -97,27 +104,40 @@ export function TextCropper(props:any){
 
   const settingFunction: FunctionArray = [
     setIsDragged,
-    setIsEdit
+    setIsEdit,
+    setTextCrop
+  ]
+
+  const settingData: DataArray = [
+    isEdit, textcrop
   ]
   
   return (
     <>
       {isEdit?
-        <settingDataContext.Provider value={isEdit}>
-          <settingFuncContext.Provider value={settingFunction}>
+        <TextsettingDataContext.Provider value={settingData}>
+          <TextsettingFuncContext.Provider value={settingFunction}>
             <Text props={props.props}/>
-          </settingFuncContext.Provider>
-        </settingDataContext.Provider>
+          </TextsettingFuncContext.Provider>
+        </TextsettingDataContext.Provider>
       :
         <div className="useguesture-container">
-          <div 
+          <textarea
             ref={TextRef} 
+            readOnly
             style={{
               position: "absolute",
               left: textcrop.x,
               top: textcrop.y,
               transform: `scale(${textcrop.scale}) rotate(${textcrop.rotation}deg)`,
               touchAction: "none",
+              fontSize: `${textcrop.fontSize}px`,
+              color: textcrop.fontColor,
+              overflow: 'hidden',
+              wordWrap:'break-word',
+              maxWidth: 580,
+              fontFamily: textcrop.fontFamily,
+              textAlign: textcrop.textalign
             }}
             draggable="false"
             onDoubleClick={()=>setIsEdit(true)}
@@ -125,7 +145,7 @@ export function TextCropper(props:any){
             onMouseUp={()=>setIsDragged(false)}
           >
             {props.props.content}
-          </div>
+          </textarea>
           {isDragged?
           <div className="trash-can">드래그 중입니다.</div>
           :

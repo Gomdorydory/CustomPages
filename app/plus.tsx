@@ -62,7 +62,7 @@ export default function Plus() {
     <listSettingContext.Provider value={setList}>
       <listDataContext.Provider value={list}>
       {result}
-        <div className="main-plus">
+        <div className="main-plus" style={{zIndex: -2}}>
         <div className="item"  onClick={OnText}><FontAwesomeIcon icon={faPenToSquare} size='sm'/></div>
         <div className="item"  onClick={OnPhoto}><FontAwesomeIcon icon={faImage} size='sm'/></div>
         <div className="item"  onClick={OnMap}><FontAwesomeIcon icon={faMapLocationDot} size='sm'/></div>
