@@ -65,7 +65,7 @@ export default function Text(props:any) {
   let colorResult = color.map(
     (i)=>{
       return(
-      <div style={{backgroundColor:i, borderRadius: '50%', width: '30px', height: '20px'}} 
+      <div key={i} style={{backgroundColor:i, borderRadius: '50%', width: '30px', height: '20px'}} 
       onClick={()=>ChangeColor(i)}></div>
       )
     }
@@ -81,7 +81,7 @@ export default function Text(props:any) {
 
   let fontFamilyResult = fontfamily.map((i)=>{
       return(
-      <div style={{backgroundColor:i, width: '50px', height: '20px', background: 'gray', fontFamily:i, fontSize: '20px', textAlign: 'center'}} 
+      <div key={i} style={{backgroundColor:i, width: '50px', height: '20px', background: 'gray', fontFamily:i, fontSize: '20px', textAlign: 'center'}} 
       onClick={()=>ChangeFontFamily(i)}>글꼴</div>
       )
     }

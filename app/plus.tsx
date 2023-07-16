@@ -36,7 +36,6 @@ export default function Plus() {
     let myuuid = uuidv4();
     let NewItem : PlusInfo = {id: myuuid, content: 'first', type: 'text'}
     setList((list)=>[...list, NewItem])
-    console.log(list)
   }
 
   const OnPhoto = () =>{

@@ -92,7 +92,6 @@ body {
 
 
   text-align: center;
-  font-size: max(5vw, 100px);
   color: var(--gray-color);
 
   -webkit-user-select:none;
@@ -134,18 +133,15 @@ body {
   flex-direction: row;
 }
 
-.useguesture-container {
+/*.useguesture-container {
   background-color: rgba(128, 128, 128, 0.361);
   position: absolute;
-  left: 40vw;
+  left: 100vw;
   top: 50vh;
   transform:translateX(-50%, -50%);
   max-width: 580px;
-  overflow: 'hidden';
-  word-wrap:'break-word';
-  display: inline-block;
   font-family: 'Nanum Myeongjo';
-}
+}*/
 
 
 .create-text{

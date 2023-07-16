@@ -80,19 +80,54 @@ export function TextCropper(props:any){
   //setting-mode
   let [isEdit, setIsEdit] = useState<boolean>(true);
   let [isDragged, setIsDragged] = useState<boolean>(false);
-  let [textcrop, setTextCrop] = useState<settext>({id: props.props.id, x: 0, y: 0, scale:1, rotation: 0, fontSize: 100, fontColor: 'black', textalign: 'left', fontFamily: 'Cafe24Shiningstar'});
-  let TextRef = useRef<HTMLTextAreaElement>(null);
-  console.log(textcrop)
+  let [textcrop, setTextCrop] = useState<settext>({id: props.props.id, x: '50vw', y: '50vh', scale:1, rotation: 0, fontSize: 100, fontColor: 'black', textalign: 'left', fontFamily: 'Cafe24Shiningstar'});
+  let TextRef = useRef<HTMLDivElement>(null);
+  //console.log(textcrop)
+  let [offset, SetOffset] = useState([0,0]);
 
-
+  let lastPosition: React.MutableRefObject<number> = useRef(0);
+  let firstTime: React.MutableRefObject<number> = useRef(0);
   useGesture(
     {
-      onDrag: ({offset}) => {
-        setTextCrop({...textcrop, x: offset[0], y:offset[1]})
+      onDrag: (offset) => {
+      if(firstTime.current == 0) {
+        let resultX :number
+        let resultY : number
+      if (TextRef.current) {
+        resultX = offset.xy[0]- Number(TextRef.current.offsetWidth)*50/100
+        resultY = offset.xy[1]- Number(TextRef.current.offsetHeight)*50/100
+        offset.offset[0] = resultX
+        offset.offset[1] = resultY
+        setTextCrop({...textcrop, x: resultX, y:resultY})
+      }
+      }else {
+        setTextCrop({...textcrop, x: offset.offset[0], y:offset.offset[1]})
+      }
       },
       onPinch: (offset) => {
-        setTextCrop((textcrop)=> ({...textcrop, scale: offset.offset[0], rotation: offset.da[1]+90}))
-        if(TextRef.current){
+
+        let NewAngle = offset.da[1] + 90 //각도가 이상하게 먹혀서 90도를 더해준다.
+      //터치 방향에 따라 음수가 나오는 경우가 있어서, 같은 각도를 양수로 표현해준다.
+      if(NewAngle >= 360){
+          NewAngle= NewAngle % 360
+      } 
+      if (NewAngle < 0) {
+        NewAngle = Math.abs(NewAngle)
+        NewAngle= NewAngle % 360
+        NewAngle = -1*NewAngle
+        NewAngle+=360
+      }
+      //터치up하면 lastPostion이 0이된다. 그래서, 첫번째로 터치한 부분을 기준점으로 만들 수 있다.
+      //터치up을 하지 않고 계속 하는 경우에만, lastposition값이 생긴다. 
+      //처음터치가 90 이면, 떼지않고 이동하여 91이 될 때 변화량은 1이된다.
+      if(lastPosition.current == 0) {
+        lastPosition.current = NewAngle
+      } else {
+        //lastPosition을 이용하여, 현재 각도에서 이전 각도를 뺀다.
+        let resultAngle = NewAngle - lastPosition.current
+        //그 변화량 만큼만 이전 각도에 더해준다.
+        setTextCrop((textcrop)=> ({...textcrop, scale: offset.offset[0], rotation: resultAngle+textcrop.rotation}))
+      lastPosition.current = NewAngle
       }
       },
     }
@@ -122,19 +157,18 @@ export function TextCropper(props:any){
         </TextsettingDataContext.Provider>
       :
         <div className="useguesture-container">
-          <textarea
+          <div
             ref={TextRef} 
-            readOnly
             style={{
               position: "absolute",
               left: textcrop.x,
               top: textcrop.y,
-              transform: `scale(${textcrop.scale}) rotate(${textcrop.rotation}deg)`,
+              transform: `scale(${textcrop.scale}) rotate(${textcrop.rotation}deg`,
               touchAction: "none",
               fontSize: `${textcrop.fontSize}px`,
               color: textcrop.fontColor,
               overflow: 'hidden',
-              wordWrap:'break-word',
+              wordWrap: 'normal',
               maxWidth: 580,
               fontFamily: textcrop.fontFamily,
               textAlign: textcrop.textalign
@@ -143,9 +177,12 @@ export function TextCropper(props:any){
             onDoubleClick={()=>setIsEdit(true)}
             onMouseDown={()=>setIsDragged(true)}
             onMouseUp={()=>setIsDragged(false)}
+            onTouchEnd={()=>{lastPosition.current = 0
+              firstTime.current += 1}}
+            onClick={(e)=>SetOffset([e.nativeEvent.offsetX, e.nativeEvent.offsetY])}
           >
             {props.props.content}
-          </textarea>
+          </div>
           {isDragged?
           <div className="trash-can">드래그 중입니다.</div>
           :
