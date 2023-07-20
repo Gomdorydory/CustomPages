@@ -3,7 +3,6 @@
 import { useRef, useState, useContext, useEffect} from 'react';
 
 import { faAlignLeft, faList12 } from "@fortawesome/free-solid-svg-icons";
-import { faUnderline } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { listDataContext, listSettingContext } from "../plus";

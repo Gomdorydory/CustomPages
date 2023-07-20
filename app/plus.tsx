@@ -11,7 +11,11 @@ import { faTableCellsLarge } from "@fortawesome/free-solid-svg-icons";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Text from "./create/text";
-import {ImageCropper, TextCropper} from "./library/useguesture";
+import {ImageCropper, TextCropper, MapCropper} from "./library/useguesture";
+
+
+import Map from "./create/map";
+
 
 export interface PlusInfo {
   id: string | undefined;
@@ -42,6 +46,10 @@ export default function Plus() {
   }
 
   const OnMap = () =>{
+    let myuuid = uuidv4();
+    let NewItem : PlusInfo = {id: myuuid, content: '서울역', type: 'map'}
+    setList((list)=>[...list, NewItem])
+    console.log(list)
   }
 
   const OnAlbum = () =>{
@@ -50,10 +58,16 @@ export default function Plus() {
 
   let result = list.map(
     (list)=>{
+      if(list.type=='text'){
       return(
     <div className="main-item" key={list.id}>
       <TextCropper props={list}/>
     </div>)
+    } else if(list.type =='map') {
+      return(
+        <MapCropper props={list}/>
+      )
+    }
     }
     )
 

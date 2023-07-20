@@ -3,7 +3,10 @@
 import React, { useRef, useState, useContext, useEffect} from "react"
 import { listDataContext } from "../plus"
 import { useDrag, useGesture } from "@use-gesture/react"
+
 import Text from "../create/text"
+import Map from "../create/map";
+
 import { types, PlusInfo } from "../plus"
 
 'https://yourheartbadge.co.kr/web/product/tiny/attachment005.jpg'
@@ -62,13 +65,18 @@ interface settext {
   y: string|number,
   scale: number,
   rotation: number,
+  
   fontSize?: number,
   fontColor?: string,
   textalign?: textalign,
   fontFamily: string,
+
 }
 
-export type FunctionArray = Array<React.Dispatch<React.SetStateAction<boolean>>| React.Dispatch<React.SetStateAction<settext>>>
+
+
+
+export type FunctionArray = Array<React.Dispatch<React.SetStateAction<boolean>>| React.Dispatch<React.SetStateAction<settext>>| React.Dispatch<React.SetStateAction<maptext>>>
 export let TextsettingFuncContext = React.createContext<FunctionArray | undefined>(undefined);
 
 export type DataArray = Array<boolean | undefined | number | settext>
@@ -180,6 +188,7 @@ export function TextCropper(props:any){
             onTouchEnd={()=>{lastPosition.current = 0
               firstTime.current += 1}}
             onClick={(e)=>SetOffset([e.nativeEvent.offsetX, e.nativeEvent.offsetY])}
+
           >
             {props.props.content}
           </div>
@@ -193,3 +202,152 @@ export function TextCropper(props:any){
     </>
   )
 }
+
+
+//textcrop
+
+interface maptext {
+  id : string|undefined,
+  x: string|number,
+  y: string|number,
+  scale: number,
+  rotation: number,
+  
+  fontSize?: number,
+  fontColor?: string,
+  textalign?: textalign,
+  fontFamily: string,
+}
+
+
+export let MapsettingFuncContext = React.createContext<FunctionArray | undefined>(undefined);
+
+export let MapsettingDataContext = React.createContext<DataArray | undefined>(undefined);
+
+export function MapCropper(props:any){
+  let list:any = useContext(listDataContext);
+
+  //setting-mode
+  let [isEdit, setIsEdit] = useState<boolean>(true);
+  let [isDragged, setIsDragged] = useState<boolean>(false);
+  let [mapcrop, setMapCrop] = useState<settext>({id: props.props.id, x: '50vw', y: '50vh', scale:1, rotation: 0, fontSize: 100, fontColor: 'black', textalign: 'left', fontFamily: 'Cafe24Shiningstar'});
+  let MapRef = useRef<HTMLDivElement>(null);
+  //console.log(textcrop)
+  let [offset, SetOffset] = useState([0,0]);
+
+  let lastPosition: React.MutableRefObject<number> = useRef(0);
+  let firstTime: React.MutableRefObject<number> = useRef(0);
+  useGesture(
+    {
+      onDrag: (offset) => {
+      if(firstTime.current == 0) {
+        let resultX :number
+        let resultY : number
+      if (MapRef.current) {
+        resultX = offset.xy[0]- Number(MapRef.current.offsetWidth)*50/100
+        resultY = offset.xy[1]- Number(MapRef.current.offsetHeight)*50/100
+        offset.offset[0] = resultX
+        offset.offset[1] = resultY
+        setMapCrop({...mapcrop, x: resultX, y:resultY})
+      }
+      }else {
+        setMapCrop({...mapcrop, x: offset.offset[0], y:offset.offset[1]})
+      }
+      },
+      onPinch: (offset) => {
+        setMapCrop((mapcrop)=> ({...mapcrop, scale: offset.offset[0]}))
+      },
+    }
+    ,
+    {
+      target: MapRef,
+    }
+  )
+
+  const settingFunction: FunctionArray = [
+    setIsDragged,
+    setIsEdit,
+    setMapCrop
+  ]
+
+  const settingData: DataArray = [
+    isEdit, mapcrop
+  ]
+  
+  return (
+    <>
+      {isEdit?
+          <div className="useguesture-container">
+          <div
+            ref={MapRef} 
+            style={{
+              position: "absolute",
+              left: mapcrop.x,
+              top: mapcrop.y,
+              transform: `scale(${mapcrop.scale}) rotate(${mapcrop.rotation}deg`,
+              touchAction: "none",
+              fontSize: `${mapcrop.fontSize}px`,
+              color: mapcrop.fontColor,
+              overflow: 'hidden',
+              wordWrap: 'normal',
+              maxWidth: 580,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              fontFamily: mapcrop.fontFamily,
+              textAlign: mapcrop.textalign,
+              border: "gray 1px solid"
+            }}
+            draggable="false"
+            onMouseDown={()=>setIsDragged(true)}
+            onMouseUp={()=>setIsDragged(false)}
+            onTouchEnd={()=>{lastPosition.current = 0
+              firstTime.current += 1}}
+            onClick={(e)=>SetOffset([e.nativeEvent.offsetX, e.nativeEvent.offsetY])}
+            onMouseEnter={()=>{console.log('바보얌')}}
+            onDoubleClick={()=>setIsEdit(false) }
+          >
+            <Map latitude={37.55465450967681} longitude={126.97059787317687} width={500} height={300} tag="서울역"/>
+        </div>
+        {isDragged?
+          <div className="trash-can">드래그 중입니다.</div>
+          :
+          <></>
+          }
+        </div>
+      :
+      <MapsettingDataContext.Provider value={settingData}>
+          <MapsettingFuncContext.Provider value={settingFunction}>
+            <div style={{
+              position: "absolute",
+              left: mapcrop.x,
+              top: mapcrop.y,
+              transform: `scale(${mapcrop.scale}) rotate(${mapcrop.rotation}deg`,
+              touchAction: "none",
+              fontSize: `${mapcrop.fontSize}px`,
+              color: mapcrop.fontColor,
+              overflow: 'hidden',
+              wordWrap: 'normal',
+              maxWidth: 580,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              fontFamily: mapcrop.fontFamily,
+              textAlign: mapcrop.textalign
+            }}
+            onDoubleClick={()=>setIsEdit(true) }
+            >
+                <Map latitude={37.55465450967681} longitude={126.97059787317687} width={500} height={300} tag="서울역"/>
+            </div>
+          </MapsettingFuncContext.Provider>
+      </MapsettingDataContext.Provider>
+      }
+    </>
+  )
+}
+
+
+
+/*             <Map latitude={37.55465450967681} longitude={126.97059787317687} width={500} height={300} tag="서울역"/> */
