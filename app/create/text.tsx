@@ -9,6 +9,7 @@ import { listDataContext, listSettingContext } from "../plus";
 import { TextsettingDataContext, TextsettingFuncContext } from "../library/useguesture"; 
 
 export default function Text(props:any) {
+
   //plus.tsx의 list 값 Context
   let list: any = useContext(listDataContext);
   let listSettingFunc: any = useContext(listSettingContext);
@@ -34,18 +35,11 @@ export default function Text(props:any) {
     setIsEdit(false)
   }
 
-
   const onChangeContent = (value:string)=> {
     let Newlist = [ ...list ]
     let targetIndex = Newlist.findIndex(v => v.id == props.props.id)
-    //console.log(props.props.id);
-    //console.log(targetIndex);
-    //console.log(Newlist[targetIndex])
     Newlist[targetIndex].content = value
     setList(Newlist)
-    console.log(textcrop.fontSize)
-    //console.log(list)
-    //console.log(props.content)
   }
 
 
@@ -98,6 +92,8 @@ export default function Text(props:any) {
       NewTextCrop.textalign = textalign[index.current]
       setTextCrop(NewTextCrop)
     }
+
+
 
   return (
     <div className="create-text">

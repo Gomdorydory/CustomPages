@@ -1,4 +1,5 @@
 import Map from "./create/map";
+import Photo from "./create/photo";
 import Plus from "./plus";
 
 

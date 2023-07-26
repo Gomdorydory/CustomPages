@@ -1,6 +1,7 @@
 'use client'
 
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState, useContext} from "react";
+import { PlusInfo, listDataContext, listSettingContext } from "../plus";
 import { useGesture } from "@use-gesture/react"
 
 
@@ -15,10 +16,16 @@ export interface MapProps {
   longitude: number;
   width: number;
   height: number;
-  tag: string
+  tag: string;
+  props: any;
+  isEdit: boolean;
 }
 var addressresult : string
-export default function Map({latitude, longitude, width, height, tag}:MapProps) {
+
+export default function Map({props, latitude, longitude, width, height, tag, isEdit}:MapProps) {
+  let list: any = useContext(listDataContext);
+  let setList: any = useContext(listSettingContext);
+
     useEffect(()=>{
   const mapScript = document.createElement("script");
 
@@ -38,13 +45,9 @@ export default function Map({latitude, longitude, width, height, tag}:MapProps) 
       };
 
       new window.kakao.maps.Map(mapContainer, mapOption);
-
       let maps = new window.kakao.maps.Map(mapContainer, mapOption);
-
       let markerPosition = new window.kakao.maps.LatLng(37.55465450967681, 126.97059787317687)
-
       let marker = new window.kakao.maps.Marker({position: markerPosition})
-
       marker.setMap(maps);
 
       var customOverlay= new window.kakao.maps.CustomOverlay({
@@ -74,13 +77,39 @@ export default function Map({latitude, longitude, width, height, tag}:MapProps) 
   mapScript.addEventListener("load", onLoadKakaoMap);
 }, [latitude, longitude])
 
+let deletebuttonwidth:number = 40
 
 
+//
+let deleteMap = ()=>{
+  let Newlist = list.filter( (lists:any) => lists.id != props.id)
+  setList(Newlist)
+}
+
+//
 
 
-//}
   return (<>
   <div style={{fontSize: '50px', }} draggable="false">찾아오시는 길</div>
+  {isEdit?
+      <button
+      style={{
+        height:deletebuttonwidth, 
+        width:deletebuttonwidth, 
+        position:'absolute',
+        left:width-deletebuttonwidth,
+        top:0, 
+        backgroundColor:'red', 
+        borderRadius:'50%'
+      }}
+      onClick={deleteMap}
+      >
+        X
+      </button>
+  :
+      <></>
+  }
+
   <div style={{fontSize: '20px', }} draggable="false">{addressresult}</div>
   <div style={{width:width, height:height}} id="map">
   </div>
