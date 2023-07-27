@@ -9,10 +9,17 @@ import Text from "../create/text"
 import Map from "../create/map";
 
 
+// 해야하는 것: 드래그 앤 드롭으로 휴지통 구현하기 
+// list에서 id값으로 list에서 해당 객체 삭제하기
+// 웹 사이트 디자인 알아보기r
+
 'https://yourheartbadge.co.kr/web/product/tiny/attachment005.jpg'
 //----------------------imagecrop---------------------
 
-export function ImageCropper(list:any){
+export function ImageCropper(props:any){
+  let list:any = useContext(listDataContext);
+  let setList:any = useContext(listSettingContext)
+
   let [isEdit, setIsEdit] = useState<boolean>(false);
   let [isDragged, setIsDragged] = useState(false);
 
@@ -37,6 +44,15 @@ export function ImageCropper(list:any){
       }else {
         setImageCrop({...imagecrop, x: offset.offset[0], y:offset.offset[1]})
       }
+      if(Number(offset.xy[0]) >= window.innerWidth*45/100 && 
+      Number(offset.xy[0]) < window.innerWidth*55/100 && 
+      Number(offset.xy[1]) > window.innerHeight*70/100 && 
+      Number(offset.xy[1]) < window.innerHeight*80/100 && 
+      isDragged) {
+        console.log('범위 내')
+    // isDraggble == true 이면, 휴지통 컴포넌트의 색상 바꾸기
+    // 의문: 현재 디바이스에 따라 좌표가 조금씩 바뀌는데 그것은 어떻게 처리하면 좋을까? 부등호는 숫자에만 쓸 수 있어서 자동적으로 px로 고정되어 있음. window.innerWidth 값을 사용하여 계산하여 처리하자.
+  }
       },
       onPinch: (offset) => {
 
@@ -67,7 +83,18 @@ export function ImageCropper(list:any){
       ,
       onDragStart: (()=>{setIsDragged(true)})
       ,
-      onDragEnd: (()=>{setIsDragged(false)})
+      onDragEnd: ((offset)=>{
+        setIsDragged(false)
+        if(Number(offset.xy[0]) >= window.innerWidth*45/100 && 
+        Number(offset.xy[0]) < window.innerWidth*55/100 && 
+        Number(offset.xy[1]) > window.innerHeight*70/100 && 
+        Number(offset.xy[1]) < window.innerHeight*80/100 && 
+        isDragged) {
+          let Newlist = list.filter( (lists:any) => lists.id != props.props.id)
+          console.log(Newlist)
+          setList(Newlist)
+        }
+      })
     }
     ,
     {
@@ -79,7 +106,7 @@ export function ImageCropper(list:any){
       <div className="useguesture-container">
         <div>
           <img
-            src={list.props.content}
+            src={props.props.content}
             ref={imageRef}
             style={{
               position: "absolute",
@@ -129,6 +156,7 @@ export let TextsettingDataContext = React.createContext<DataArray | undefined>(u
 
 export function TextCropper(props:any){
   let list:any = useContext(listDataContext);
+  let setList:any = useContext(listSettingContext)
   let [isDragged, setIsDragged] = useState(false);
 
 
@@ -154,6 +182,16 @@ export function TextCropper(props:any){
       }
       }else {
         setTextCrop({...textcrop, x: offset.offset[0], y:offset.offset[1]})
+      }
+
+      if(Number(offset.xy[0]) >= window.innerWidth*45/100 && 
+          Number(offset.xy[0]) < window.innerWidth*55/100 && 
+          Number(offset.xy[1]) > window.innerHeight*70/100 && 
+          Number(offset.xy[1]) < window.innerHeight*80/100 && 
+          isDragged) {
+            console.log('범위 내')
+        // isDraggble == true 이면, 휴지통 컴포넌트의 색상 바꾸기
+        // 의문: 현재 디바이스에 따라 좌표가 조금씩 바뀌는데 그것은 어떻게 처리하면 좋을까? 부등호는 숫자에만 쓸 수 있어서 자동적으로 px로 고정되어 있음. window.innerWidth 값을 사용하여 계산하여 처리하자.
       }
       },
       onPinch: (offset) => {
@@ -185,7 +223,18 @@ export function TextCropper(props:any){
       ,
       onDragStart: (()=>{setIsDragged(true)})
       ,
-      onDragEnd: (()=>{setIsDragged(false)})
+      onDragEnd: ((offset)=>{
+        setIsDragged(false)
+        if(Number(offset.xy[0]) >= window.innerWidth*45/100 && 
+        Number(offset.xy[0]) < window.innerWidth*55/100 && 
+        Number(offset.xy[1]) > window.innerHeight*70/100 && 
+        Number(offset.xy[1]) < window.innerHeight*80/100 && 
+        isDragged) {
+          let Newlist = list.filter( (lists:any) => lists.id != props.props.id)
+          console.log(Newlist)
+          setList(Newlist)
+        }
+      })
     }
     ,
     {
@@ -238,10 +287,11 @@ export function TextCropper(props:any){
           </div>
         </div>
       }
-      {isEdit?
+      {isDragged?
       <Trashcan />
       :
-      <></>
+      <>
+      </>
       }
     </>
   )
@@ -296,6 +346,10 @@ export function MapCropper(props:any){
       }else {
         setMapCrop({...mapcrop, x: offset.offset[0], y:offset.offset[1]})
       }
+      console.log('왜 이상하지')
+      console.log(MapRef.current?.offsetWidth)
+      console.log(MapRef.current?.offsetHeight)
+      console.log(firstTime.current)
       },
       onPinch: (offset) => {
         setMapCrop((mapcrop)=> ({...mapcrop, scale: offset.offset[0]}))
@@ -350,6 +404,8 @@ export function MapCropper(props:any){
             }}
             draggable="false"
             onDoubleClick={()=>setIsEdit(false) }
+            onTouchEnd={()=>{lastPosition.current = 0
+              firstTime.current += 1}}
           >
             <Map props={props.props} isEdit={true} latitude={37.55465450967681} longitude={126.97059787317687} width={500} height={300} tag="서울역"/>
         </div>
@@ -375,7 +431,9 @@ export function MapCropper(props:any){
               fontFamily: mapcrop.fontFamily,
               textAlign: mapcrop.textalign
             }}
-            onDoubleClick={()=>setIsEdit(true) }
+            onDoubleClick={()=>setIsEdit(true)}
+            onTouchEnd={()=>{lastPosition.current = 0
+              firstTime.current += 1}}
             >
                 <Map isEdit={isEdit} props={props.props} latitude={37.55465450967681} longitude={126.97059787317687} width={500} height={300} tag="서울역"/>
             </div>
@@ -390,6 +448,6 @@ export function MapCropper(props:any){
 export default function Trashcan() {
 
   return(
-    <div>휴지통입니다.</div>
+    <div style={{position:'fixed', left: window.innerWidth*45/100, top: window.innerHeight*70/100, zIndex:10, width: window.innerWidth*10/100, height: window.innerHeight*10/100, backgroundColor: 'gray'}} onMouseUpCapture={()=>console.log('실행')}>휴지통입니다.</div>
   )
 }
