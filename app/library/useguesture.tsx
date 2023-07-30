@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useState, useContext} from "react"
+import React, { useRef, useState, useContext, useEffect} from "react"
 
 import { listDataContext,listSettingContext } from "../plus"
 import { useGesture } from "@use-gesture/react"
@@ -8,10 +8,14 @@ import { useGesture } from "@use-gesture/react"
 import Text from "../create/text"
 import Map from "../create/map";
 
-
-// 해야하는 것: 드래그 앤 드롭으로 휴지통 구현하기 
-// list에서 id값으로 list에서 해당 객체 삭제하기
-// 웹 사이트 디자인 알아보기r
+// 웹 사이트 디자인 알아보기 --> 디자인 수정 : 스크롤바 없는 버튼식 페이지 (페이지 넘기기는... 상단 버튼으로...)
+// 페이지 이동 및 수정은 레퍼런스 찾아보기 (아마 프로크리에이트나 파워포인트 레이아웃 UI 따라하면 되지 않을까?)
+// useGesture options에서 boundaries 알아보기
+// 디자인은 직관적이고 간단하게! 복잡한 버튼 여러개X 너무 선택지 많이 주지 말고, 꼭 필요한 버튼만 만들기
+// boundary를 이용하여 페이지 전체의 길이 설정해보기
+// 버튼을 누르면 페이지 전체의 길이를 계속 추가할 수 있게 하기
+// map 다중으로 부르기 vs 하나만 부를 수 있게 제한하기 (선택)
+// 누르면 카피가 되는 div버튼 만들기
 
 'https://yourheartbadge.co.kr/web/product/tiny/attachment005.jpg'
 //----------------------imagecrop---------------------
@@ -31,25 +35,12 @@ export function ImageCropper(props:any){
   useGesture(
     {
       onDrag: (offset) => {
-      if(firstTime.current == 0) {
-        let resultX :number
-        let resultY : number
-      if (imageRef.current) {
-        resultX = offset.xy[0]- Number(imageRef.current.offsetWidth)*50/100
-        resultY = offset.xy[1]- Number(imageRef.current.offsetHeight)*50/100
-        offset.offset[0] = resultX
-        offset.offset[1] = resultY
-        setImageCrop({...imagecrop, x: resultX, y:resultY})
-      }
-      }else {
         setImageCrop({...imagecrop, x: offset.offset[0], y:offset.offset[1]})
-      }
       if(Number(offset.xy[0]) >= window.innerWidth*45/100 && 
       Number(offset.xy[0]) < window.innerWidth*55/100 && 
       Number(offset.xy[1]) > window.innerHeight*70/100 && 
       Number(offset.xy[1]) < window.innerHeight*80/100 && 
       isDragged) {
-        console.log('범위 내')
     // isDraggble == true 이면, 휴지통 컴포넌트의 색상 바꾸기
     // 의문: 현재 디바이스에 따라 좌표가 조금씩 바뀌는데 그것은 어떻게 처리하면 좋을까? 부등호는 숫자에만 쓸 수 있어서 자동적으로 px로 고정되어 있음. window.innerWidth 값을 사용하여 계산하여 처리하자.
   }
@@ -91,7 +82,6 @@ export function ImageCropper(props:any){
         Number(offset.xy[1]) < window.innerHeight*80/100 && 
         isDragged) {
           let Newlist = list.filter( (lists:any) => lists.id != props.props.id)
-          console.log(Newlist)
           setList(Newlist)
         }
       })
@@ -103,17 +93,17 @@ export function ImageCropper(props:any){
   )
   return (
     <>
-      <div className="useguesture-container">
-        <div>
+        <div className="useguesture-container" style={{position: "absolute", overflow: 'visible', visibility: 'hidden'}}>
           <img
             src={props.props.content}
             ref={imageRef}
             style={{
-              position: "absolute",
+              position: "relative",
               left: imagecrop.x,
               top: imagecrop.y,
               transform: `scale(${imagecrop.scale}) rotate(${imagecrop.rotation}deg`,
               touchAction: "none",
+              visibility: 'visible'
             }}
             draggable="false"
             onDoubleClick={()=>setIsEdit(true)}
@@ -121,7 +111,6 @@ export function ImageCropper(props:any){
               firstTime.current += 1}}
           >
           </img>
-        </div>
       </div>
       {isDragged?
           <Trashcan />
@@ -158,38 +147,38 @@ export function TextCropper(props:any){
   let list:any = useContext(listDataContext);
   let setList:any = useContext(listSettingContext)
   let [isDragged, setIsDragged] = useState(false);
+  let TextRef = useRef<HTMLDivElement>(null);
+  let RectWidth:number|string = '50vw'
+  let RectHeight:number|string = '50vh'
+  let lastPosition: React.MutableRefObject<number> = useRef(0);
+  let firstTime: React.MutableRefObject<number> = useRef(0);
 
 
   //setting-mode
   let [isEdit, setIsEdit] = useState<boolean>(true);
-  let [textcrop, setTextCrop] = useState<settext>({id: props.props.id, x: '50vw', y: '50vh', scale:1, rotation: 0, fontSize: 100, fontColor: 'black', textalign: 'left', fontFamily: 'Cafe24Shiningstar'});
-  let TextRef = useRef<HTMLDivElement>(null);
+  let [textcrop, setTextCrop] = useState<settext>({id: props.props.id, x: 0, y: 0, scale:1, rotation: 0, fontSize: 100, fontColor: 'black', textalign: 'left', fontFamily: 'Cafe24Shiningstar'});
 
-  let lastPosition: React.MutableRefObject<number> = useRef(0);
-  let firstTime: React.MutableRefObject<number> = useRef(0);
+  useEffect(
+  ()=>{
+    if(TextRef.current) {
+    RectWidth = window.innerWidth/2 - TextRef.current.getBoundingClientRect().width
+    RectHeight = window.innerHeight/2 - TextRef.current.getBoundingClientRect().height
+    setTextCrop({...textcrop, x: RectWidth, y:RectHeight})
+  }
+  }
+  ,[TextRef])
+  
   useGesture(
     {
       onDrag: (offset) => {
-      if(firstTime.current == 0) {
-        let resultX :number
-        let resultY : number
-      if (TextRef.current) {
-        resultX = offset.xy[0]- Number(TextRef.current.offsetWidth)*50/100
-        resultY = offset.xy[1]- Number(TextRef.current.offsetHeight)*50/100
-        offset.offset[0] = resultX
-        offset.offset[1] = resultY
-        setTextCrop({...textcrop, x: resultX, y:resultY})
-      }
-      }else {
-        setTextCrop({...textcrop, x: offset.offset[0], y:offset.offset[1]})
-      }
+
+      setTextCrop({...textcrop, x: offset.offset[0], y:offset.offset[1]})
 
       if(Number(offset.xy[0]) >= window.innerWidth*45/100 && 
           Number(offset.xy[0]) < window.innerWidth*55/100 && 
           Number(offset.xy[1]) > window.innerHeight*70/100 && 
           Number(offset.xy[1]) < window.innerHeight*80/100 && 
           isDragged) {
-            console.log('범위 내')
         // isDraggble == true 이면, 휴지통 컴포넌트의 색상 바꾸기
         // 의문: 현재 디바이스에 따라 좌표가 조금씩 바뀌는데 그것은 어떻게 처리하면 좋을까? 부등호는 숫자에만 쓸 수 있어서 자동적으로 px로 고정되어 있음. window.innerWidth 값을 사용하여 계산하여 처리하자.
       }
@@ -261,11 +250,11 @@ export function TextCropper(props:any){
           </TextsettingFuncContext.Provider>
         </TextsettingDataContext.Provider>
       :
-        <div className="useguesture-container">
+        <div className="useguesture-container" style={{position: "absolute", overflow: 'visible', visibility: 'hidden'}}>
           <div
             ref={TextRef} 
             style={{
-              position: "absolute",
+              position: "relative",
               left: textcrop.x,
               top: textcrop.y,
               transform: `scale(${textcrop.scale}) rotate(${textcrop.rotation}deg`,
@@ -276,12 +265,12 @@ export function TextCropper(props:any){
               wordWrap: 'normal',
               maxWidth: 580,
               fontFamily: textcrop.fontFamily,
-              textAlign: textcrop.textalign
+              textAlign: textcrop.textalign,
+              visibility: 'visible'
             }}
             draggable="false"
             onDoubleClick={()=>setIsEdit(true)}
-            onTouchEnd={()=>{lastPosition.current = 0
-              firstTime.current += 1}}
+            onTouchEnd={()=>{lastPosition.current = 0}}
           >
             {props.props.content}
           </div>
@@ -324,7 +313,7 @@ export function MapCropper(props:any){
 
   //setting-mode
   let [isEdit, setIsEdit] = useState<boolean>(true);
-  let [mapcrop, setMapCrop] = useState<settext>({id: props.props.id, x: '30vw', y: '30vh',scale:1, rotation: 0, fontSize: 100, fontColor: 'black', textalign: 'left', fontFamily: 'Cafe24Shiningstar'});
+  let [mapcrop, setMapCrop] = useState<settext>({id: props.props.id, x:0, y:0,scale:1, rotation: 0, fontSize: 100, fontColor: 'black', textalign: 'left', fontFamily: 'Cafe24Shiningstar'});
   let MapRef = useRef<HTMLDivElement>(null);
   //console.log(textcrop)
 
@@ -333,23 +322,7 @@ export function MapCropper(props:any){
   useGesture(
     {
       onDrag: (offset) => {
-      if(firstTime.current == 0) {
-        let resultX :number
-        let resultY : number
-      if (MapRef.current) {
-        resultX = offset.xy[0]- Number(MapRef.current.offsetWidth)*50/100
-        resultY = offset.xy[1]- Number(MapRef.current.offsetHeight)*50/100
-        offset.offset[0] = resultX
-        offset.offset[1] = resultY
-        setMapCrop({...mapcrop, x: resultX, y:resultY})
-      }
-      }else {
         setMapCrop({...mapcrop, x: offset.offset[0], y:offset.offset[1]})
-      }
-      console.log('왜 이상하지')
-      console.log(MapRef.current?.offsetWidth)
-      console.log(MapRef.current?.offsetHeight)
-      console.log(firstTime.current)
       },
       onPinch: (offset) => {
         setMapCrop((mapcrop)=> ({...mapcrop, scale: offset.offset[0]}))
@@ -373,18 +346,17 @@ export function MapCropper(props:any){
   //-------------------------------지우기 Function --------------------------------
       let deleteText= ()=>{
         let Newlist = list.filter((list:any)=>{list.id != props.id})
-        console.log('실행')
         setList(Newlist)
       }
   
   return (
     <>
       {isEdit?
-          <div className="useguesture-container">
+          <div className="useguesture-container"  style={{position: "absolute", overflow: 'visible', visibility: 'hidden'}}>
           <div
             ref={MapRef} 
             style={{
-              position: "absolute",
+              position: "relative",
               left: mapcrop.x,
               top: mapcrop.y,
               transform: `scale(${mapcrop.scale}) rotate(${mapcrop.rotation}deg`,
@@ -400,12 +372,12 @@ export function MapCropper(props:any){
               alignItems: 'center',
               fontFamily: mapcrop.fontFamily,
               textAlign: mapcrop.textalign,
-              border: "gray 1px solid"
+              border: "gray 1px solid",
+              visibility: 'visible'
             }}
             draggable="false"
             onDoubleClick={()=>setIsEdit(false) }
-            onTouchEnd={()=>{lastPosition.current = 0
-              firstTime.current += 1}}
+            onTouchEnd={()=>{lastPosition.current = 0}}
           >
             <Map props={props.props} isEdit={true} latitude={37.55465450967681} longitude={126.97059787317687} width={500} height={300} tag="서울역"/>
         </div>
@@ -413,8 +385,9 @@ export function MapCropper(props:any){
       :
       <MapsettingDataContext.Provider value={settingData}>
           <MapsettingFuncContext.Provider value={settingFunction}>
+          <div className="useguesture-container" style={{position: "absolute", overflow: 'visible', visibility: 'hidden'}}>
             <div style={{
-              position: "absolute",
+              position: "relative",
               left: mapcrop.x,
               top: mapcrop.y,
               transform: `scale(${mapcrop.scale}) rotate(${mapcrop.rotation}deg`,
@@ -429,13 +402,15 @@ export function MapCropper(props:any){
               justifyContent: 'center',
               alignItems: 'center',
               fontFamily: mapcrop.fontFamily,
-              textAlign: mapcrop.textalign
+              textAlign: mapcrop.textalign,
+              visibility: 'visible'
             }}
             onDoubleClick={()=>setIsEdit(true)}
             onTouchEnd={()=>{lastPosition.current = 0
               firstTime.current += 1}}
             >
                 <Map isEdit={isEdit} props={props.props} latitude={37.55465450967681} longitude={126.97059787317687} width={500} height={300} tag="서울역"/>
+            </div>
             </div>
           </MapsettingFuncContext.Provider>
       </MapsettingDataContext.Provider>

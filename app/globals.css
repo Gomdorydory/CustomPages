@@ -48,37 +48,41 @@
 body {
   width: var(--screen-max-width);
   margin: 0 auto;
+  overflow: hidden;
+}
+
+.main-content {
+  margin: 0;
+  width: var(--screen-max-width);
+  height: 100vh;
+  background-color: rgb(192, 183, 183);
+  overflow: hidden;
 }
 
 .main-header {
+  margin: 0;
   background-color: var(--gray-color);
   height: 4vh;
 }
 
-.main-plus .item {
-  font-size: max(5vw, 40px);
-  margin: 0;
-  max-width: 200px;
-  color: white;
-  height: 10vh;
-}
+
 
 .main-plus {
   background-color: var(--gray-color);
 
   height: 10vh;
-  width: var(--screen-max-width);
+  width: 90%;
+  margin: 0 auto;
 
-  padding: 0;
+  border-radius: 10px;
 
-  position: fixed;
-  top: 90vh;
+  position: relative;
+  top: 85vh;
 
   display: flex;
   justify-content:space-around;
 
   text-align: center;
-  font-size: 100px;
   color: var(--gray-color);
 
   -webkit-user-select:none;
@@ -87,10 +91,15 @@ body {
   user-select:none
 }
 
+.main-plus .item {
+  font-size: 50px;
+  margin: 0;
+  max-width: 200px;
+  color: white;
+  height: 10vh;
+}
+
 .main-item {
-  margin: 20px 0;
-
-
   text-align: center;
   color: var(--gray-color);
 
@@ -153,6 +162,7 @@ body {
   top: 0;
   margin: var(--main-item-border-minus);
   z-index: 100;
+  margin: 0 auto;
 }
 
 .create-text textarea {
